@@ -22,7 +22,7 @@ import path.planner.shared.GenericResponse;
 public class LocationController {
 
 	@Autowired
-	LocationService locationService;
+	private LocationService locationService;
 
 	@PostMapping("/create")
 	@ResponseStatus(HttpStatus.CREATED)
@@ -36,10 +36,10 @@ public class LocationController {
 		return locationService.deleteLocation(locationId);
 	}
 
-	@PostMapping("/update")
+	@PostMapping("/update/{locationId}")
 	@ResponseStatus(HttpStatus.OK)
-	public GenericResponse updateLocation(@Valid @RequestBody Location location) {
-		locationService.save(location);
+	public GenericResponse updateLocation(@PathVariable(name = "locationId") String locationId, @Valid @RequestBody Location location) {
+		locationService.save(locationId, location);
 		return new GenericResponse("Lokasyon güncellendi.");
 	}
 

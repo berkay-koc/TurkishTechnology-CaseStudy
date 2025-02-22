@@ -10,7 +10,7 @@ import path.planner.shared.GenericResponse;
 public class LocationService {
 
 	@Autowired
-	LocationRepository locationRepository;
+	private LocationRepository locationRepository;
 
 	public GenericResponse save(Location location) {
 		Location controlLocation = getLocationById(location.getLocationCode());
@@ -19,6 +19,16 @@ public class LocationService {
 			return new GenericResponse("Lokasyon eklendi.");
 		} else {
 			return new GenericResponse("Bu kodlu lokasyon zaten var.");
+		}
+	}
+	
+	public GenericResponse save(String locationId, Location location) {
+		Location controlLocation = getLocationById(locationId);
+		if(controlLocation == null) {
+			return new GenericResponse("Lokasyon güncellenemedi.");
+		} else {
+			locationRepository.save(location);
+			return new GenericResponse("Lokasyon güncellendi.");
 		}
 		
 	}
