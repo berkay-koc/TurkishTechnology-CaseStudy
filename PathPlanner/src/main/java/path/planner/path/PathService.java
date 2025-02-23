@@ -3,11 +3,13 @@ package path.planner.path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import path.planner.locations.LocationService;
 import path.planner.transportations.Transportation;
 import path.planner.transportations.TransportationEnum;
 import path.planner.transportations.TransportationService;
@@ -17,6 +19,9 @@ public class PathService {
 
 	@Autowired
 	private TransportationService transportationService;
+
+	@Autowired
+	private LocationService locationService;
 
 	public Path findAllPaths(PathRequest pathRequest, List<String> lastLocations,
 			List<Transportation> transportationList, Path path) {
@@ -80,6 +85,24 @@ public class PathService {
 		}
 
 		return beforeFlightControl && afterFlightControl;
+	}
+
+	public void formatLocationNames(Path allPaths) {
+		Map<String, String> locationsMap = locationService.getAllLocationsAsMap();
+
+		for (List<Transportation> transportationList : allPaths.getTransportationList()) {
+			for (Transportation transportation : transportationList) {
+				if (!transportation.getFromLocation().contains(",  ")) {
+					transportation.setFromLocation(transportation.getFromLocation() + ",  "
+							+ locationsMap.get(transportation.getFromLocation()));
+				}
+				if (!transportation.getToLocation().contains(",  ")) {
+					transportation.setToLocation(
+							transportation.getToLocation() + ",  " + locationsMap.get(transportation.getToLocation()));
+				}
+			}
+		}
+
 	}
 
 }

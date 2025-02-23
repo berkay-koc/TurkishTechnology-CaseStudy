@@ -31,18 +31,18 @@ public class Transportation implements Serializable {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private long transportationId;
 
-	@Size(min = 1, max = 255, message = "Nereden bilgisi 1-255 karakter uzunluğu aralığında olmalıdır.")
+	@Size(min = 1, max = 255, message = "From location must be between 1 and 255 characters.")
 	@Column(name = "from_location", nullable = false)
-	@NotNull(message = "Nereden bilgisi boş olamaz")
+	@NotNull(message = "From location cannot be empty.")
 	private String fromLocation;
 
-	@Size(min = 1, max = 255, message = "Nereye bilgisi 1-255 karakter uzunluğu aralığında olmalıdır.")
+	@Size(min = 1, max = 255, message = "To location must be between 1 and 255 characters.")
 	@Column(name = "to_location", nullable = false)
-	@NotNull(message = "Nereye bilgisi boş olamaz")
+	@NotNull(message = "To location cannot be empty.")
 	private String toLocation;
 
 	@Column(name = "transportation_type", nullable = false)
-	@NotNull(message = "Araç tipi boş olamaz")
+	@NotNull(message = "Transportation type cannot be empty.")
 	private TransportationEnum transportationType;
 
 	@Override

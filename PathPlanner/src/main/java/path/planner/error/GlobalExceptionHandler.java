@@ -11,15 +11,16 @@ import path.planner.shared.GenericResponse;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(DataIntegrityViolationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    public GenericResponse handleDatabaseError(DataIntegrityViolationException e) {
-        return new GenericResponse("Beklenmeyen bir hata oluştu.");
-    }
+	@ExceptionHandler(DataIntegrityViolationException.class)
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public GenericResponse handleDatabaseError(DataIntegrityViolationException e) {
+	    return new GenericResponse("An unexpected error occurred.");
+	}
 
-    @ExceptionHandler(Exception.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public GenericResponse handleOtherExceptions(Exception e) {
-        return new GenericResponse("Beklenmeyen bir hata oluştu: " + e.getMessage());
-    }
+	@ExceptionHandler(Exception.class)
+	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+	public GenericResponse handleOtherExceptions(Exception e) {
+	    return new GenericResponse("An unexpected error occurred: " + e.getMessage());
+	}
+
 }

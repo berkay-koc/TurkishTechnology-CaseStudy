@@ -1,12 +1,16 @@
 package path.planner.transportations;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import path.planner.error.AlreadyExistsException;
 import path.planner.error.NotFoundException;
+import path.planner.locations.LocationService;
 import path.planner.shared.GenericResponse;
 
 @Service
@@ -15,17 +19,20 @@ public class TransportationService {
 	@Autowired
 	private TransportationRepository transportationRepository;
 
+	@Autowired
+	private LocationService locationService;
+
 	public GenericResponse save(Transportation transportation) {
 		if (transportation.getFromLocation().equals(transportation.getToLocation())) {
-			return new GenericResponse("İki lokasyon aynı olamaz.");
+			throw new AlreadyExistsException("The two locations cannot be the same.");
 		}
 		Transportation controlTransportation = findTransportationByFields(transportation.getFromLocation(),
 				transportation.getToLocation(), transportation.getTransportationType()).get();
 		if (!controlTransportation.equals(transportation)) {
 			transportationRepository.save(transportation);
-			return new GenericResponse("Yeni rota eklendi.");
+			return new GenericResponse("New route added.");
 		} else {
-			return new GenericResponse("Bu rota zaten var.");
+			throw new AlreadyExistsException("This route already exists.");
 		}
 	}
 
@@ -33,9 +40,9 @@ public class TransportationService {
 		Transportation controlTransportation = getTransportationById(Long.valueOf(transportationId));
 		if (Long.valueOf(controlTransportation.getTransportationId()) != 0) {
 			transportationRepository.delete(controlTransportation);
-			return new GenericResponse("Rota silindi.");
+			return new GenericResponse("Route deleted.");
 		} else {
-			return new GenericResponse("Rota bulunamadı.");
+			return new GenericResponse("Route not found.");
 		}
 	}
 
@@ -51,9 +58,9 @@ public class TransportationService {
 					transportation.getTransportationType() != null ? transportation.getTransportationType()
 							: inDb.getTransportationType());
 			transportationRepository.save(transportation);
-			return new GenericResponse("Rota güncellendi.");
+			return new GenericResponse("Route updated.");
 		} else {
-			return new GenericResponse("Rota bulunamadı.");
+			return new GenericResponse("Route not found.");
 		}
 	}
 
@@ -71,7 +78,15 @@ public class TransportationService {
 	}
 
 	public List<Transportation> fetchAllTransportations() {
-		return transportationRepository.findAll();
+		List<Transportation> transportations = transportationRepository.findAll();
+		Map<String, String> locationsMap = locationService.getAllLocationsAsMap();
+		for (Transportation transportation : transportations) {
+			transportation.setFromLocation(
+					transportation.getFromLocation() + " - "+ locationsMap.get(transportation.getFromLocation()));
+			transportation
+					.setToLocation(transportation.getToLocation() + " - " + locationsMap.get(transportation.getToLocation()));
+		}
+		return transportations;
 	}
 
 	public List<Transportation> fetchTransportationsByFromLocation(String fromLocation) {
@@ -85,7 +100,7 @@ public class TransportationService {
 	public Transportation fetchTransportation(String transportationId) {
 		Transportation transportation = getTransportationById(Long.valueOf(transportationId));
 		if (transportation.getTransportationId() == 0) {
-			throw new NotFoundException("Transportation bulunamadı.");
+			throw new NotFoundException("Transportation not found.");
 		}
 		return transportation;
 	}

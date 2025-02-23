@@ -22,25 +22,26 @@ public class Location implements Serializable{
 	
 	private static final long serialVersionUID = 5388524142292892126L;
 	
-	@Size(min = 1, max = 255, message = "Lokasyon ismi 1-255 karakter uzunluğu aralığında olmalıdır.")
+	@Size(min = 1, max = 255, message = "Location name must be between 1 and 255 characters.")
 	@Column(name = "name", nullable = false)
-	@NotNull(message = "Lokasyon ismi boş olamaz")
+	@NotNull(message = "Location name cannot be empty.")
 	private String name;
-	
-	@Size(min = 1, max = 255, message = "Ülke ismi 1-255 karakter uzunluğu aralığında olmalıdır.")
+
+	@Size(min = 1, max = 255, message = "Country name must be between 1 and 255 characters.")
 	@Column(name = "country", nullable = false)
-	@NotNull(message = "Ülke ismi boş olamaz")
+	@NotNull(message = "Country name cannot be empty.")
 	private String country;
-	
-	@Size(min = 1, max = 255, message = "Şehir ismi 1-255 karakter uzunluğu aralığında olmalıdır.")
+
+	@Size(min = 1, max = 255, message = "City name must be between 1 and 255 characters.")
 	@Column(name = "city", nullable = false)
-	@NotNull(message = "Şehir ismi boş olamaz")
+	@NotNull(message = "City name cannot be empty.")
 	private String city;
-	
+
 	@Column(name = "location_code", nullable = false)
 	@Id
-	@NotNull(message = "Lokasyon kodu boş olamaz")
-	@Size(min = 1, max = 255, message = "Lokasyon kodu 1-255 karakter uzunluğu aralığında olmalıdır.")
+	@NotNull(message = "Location code cannot be empty.")
+	@Size(min = 1, max = 255, message = "Location code must be between 1 and 255 characters.")
 	private String locationCode;
+
 
 }

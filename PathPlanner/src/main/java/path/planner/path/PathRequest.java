@@ -9,8 +9,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 public class PathRequest {
-	@NotNull(message="Nereden bilgisi boş olamaz.")
+	//@NotNull(message="From location cannot be empty.")
 	private String fromLocation;
-	@NotNull(message="Nereye bilgisi boş olamaz.")
+	//@NotNull(message="To location cannot be empty.")
 	private String toLocation;
 }
