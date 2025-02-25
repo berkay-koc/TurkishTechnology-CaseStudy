@@ -4,8 +4,16 @@ import addIcon from "../icons/plus-circle.svg";
 import trashIcon from "../icons/trash.svg";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import * as yup from "yup";
 import AddLocationModal from "../components/modals/AddLocationModal";
 import DeleteConfirmationModal from "../components/modals/DeleteConfirmationModal";
+
+const LocationSchema = yup.object().shape({
+  name: yup.string().required("Name is required"),
+  city: yup.string().required("City is required"),
+  country: yup.string().required("Country is required"),
+  locationCode: yup.string().required("Location Code is required"),
+});
 
 const Locations = () => {
   const [locations, setLocations] = useState([]);
@@ -109,34 +117,60 @@ const Locations = () => {
     console.log(locationData);
   };
 
-  const handleSave = () => {
-    window.axios
-      .post("http://localhost:8080/location/create", locationData)
-      .then((response) => {
-        console.log("Location created successfully:", response.data);
-        toast.success("Location added succesfully.");
-        fetchLocations();
-        closeModal();
-      })
-      .catch((error) => {
-        toast.error("Failed to add location.");
-        console.error("Error creating location:", error);
-        closeModal();
+  const handleSave = async () => {
+    try {
+      await LocationSchema.validate(locationData, {
+        abortEarly: false,
       });
+      window.axios
+        .post("http://localhost:8080/location/create", locationData)
+        .then((response) => {
+          console.log("Location created successfully:", response.data);
+          toast.success("Location added succesfully.");
+          fetchLocations();
+        })
+        .catch((error) => {
+          toast.error("Failed to add location.");
+          console.error("Error creating location:", error);
+        });
+      closeModal();
+    } catch (validationErrors) {
+      validationErrors.inner.forEach((error) => {
+        toast.error(error.message);
+      });
+    }
   };
 
   const handleUpdateLocation = async () => {
-    const { locationCode, name, city, country } = locationData;
-    const url = `http://localhost:8080/location/update/${locationCode}`;
-    const response = await window.axios.post(url, {
-      name,
-      city,
-      country,
-      locationCode,
-    });
-    toast.success("Updated location:", selectedLocation);
-    fetchLocations();
-    closeModal();
+    try {
+      await LocationSchema.validate(locationData, {
+        abortEarly: false,
+      });
+      const { locationCode, name, city, country } = locationData;
+      const url = `http://localhost:8080/location/update/${locationCode}`;
+      const response = await window.axios
+        .post(url, {
+          name,
+          city,
+          country,
+          locationCode,
+        })
+        .then((response) => {
+          console.log("Location updated successfully:", response.data);
+          toast.success("Location updated successfully.");
+          fetchLocations();
+        })
+        .catch((error) => {
+          toast.error("Failed to update location.");
+          console.error("Error updating location:", error);
+        });
+      fetchLocations();
+      closeModal();
+    } catch (validationErrors) {
+      validationErrors.inner.forEach((error) => {
+        toast.error(error.message);
+      });
+    }
   };
 
   const sortLocations = (key) => {

@@ -1,11 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import * as yup from "yup";
 import editIcon from "../icons/pen-to-square.svg";
 import addIcon from "../icons/plus-circle.svg";
 import trashIcon from "../icons/trash.svg";
 import AddTransportationModal from "../components/modals/AddTransportationModal";
 import DeleteConfirmationModal from "../components/modals/DeleteConfirmationModal";
+
+const transportationSchema = yup.object().shape({
+  fromLocation: yup.string().required("From Location is required"),
+  toLocation: yup.string().required("To Location is required"),
+  transportationType: yup.string().required("Transportation Type is required"),
+});
 
 const Transportations = () => {
   const [transportations, setTransportations] = useState([]);
@@ -40,7 +47,12 @@ const Transportations = () => {
   };
 
   const openUpdateModal = (transportation) => {
-    setTransportationData(transportation);
+    const updatedTransportation = {
+      ...transportation,
+      fromLocation: transportation.fromLocation.split(" - ")[0],
+      toLocation: transportation.toLocation.split(" - ")[0],
+    };
+    setTransportationData(updatedTransportation);
     setUpdateMode(true);
     setIsModalOpen(true);
   };
@@ -75,8 +87,8 @@ const Transportations = () => {
   }, []);
 
   useEffect(() => {
-    console.log(transportationData); // transportationData her değiştiğinde bu çalışacak
-  }, [transportationData]); // transportationData değiştiğinde tetiklenir
+    console.log("Transportation data changed:", transportationData);
+  }, [transportationData]);
 
   const handleRowClick = (transportation) => {
     setSelectedTransportation(transportation);
@@ -108,35 +120,64 @@ const Transportations = () => {
     console.log({ [name]: value });
   };
 
-  const handleSave = () => {
-    console.log(transportationData);
-    window.axios
-      .post("http://localhost:8080/transportation/create", transportationData)
-      .then((response) => {
-        console.log("Transportation created succesfully:", response.data);
-        toast.success("Transportation created succesfully.");
-        fetchTransportations();
-        closeModal();
-      })
-      .catch((error) => {
-        toast.error(error.response.data.message);
-        console.error("Error creating location:", error.response.data.message);
-        closeModal();
+  const handleSave = async (values) => {
+    try {
+      await transportationSchema.validate(values, {
+        abortEarly: false,
       });
+      console.log(values);
+      window.axios
+        .post("http://localhost:8080/transportation/create", values)
+        .then((response) => {
+          console.log("Transportation created succesfully:", response.data);
+          toast.success("Transportation created succesfully.");
+          fetchTransportations();
+          closeModal();
+        })
+        .catch((error) => {
+          toast.error(error.response.data.message);
+          console.error(
+            "Error creating location:",
+            error.response.data.message
+          );
+          closeModal();
+        });
+    } catch (validationErrors) {
+      validationErrors.inner.forEach((error) => {
+        toast.error(error.message);
+      });
+    }
   };
 
-  const handleUpdateTransportation = async () => {
-    const { fromLocation, toLocation, transportationType, transportationId } =
-      transportationData;
-    const url = `http://localhost:8080/transportation/update/${transportationId}`;
-    const response = await window.axios.post(url, {
-      fromLocation,
-      toLocation,
-      transportationType,
-    });
-    toast.success("Updated transportation.");
-    fetchTransportations();
-    closeModal();
+  const handleUpdateTransportation = async (values) => {
+    try {
+      await transportationSchema.validate(values, {
+        abortEarly: false,
+      });
+      const { fromLocation, toLocation, transportationType, transportationId } =
+        values;
+      const url = `http://localhost:8080/transportation/update/${transportationId}`;
+      const response = await window.axios
+        .post(url, {
+          fromLocation,
+          toLocation,
+          transportationType,
+        })
+        .then((response) => {
+          console.log("Transportation updated successfully:", response.data);
+          toast.success("Transportation updated successfully.");
+          fetchTransportations();
+          closeModal();
+        })
+        .catch((error) => {
+          toast.error("Failed to update transportation.", error.data.message);
+          console.error("Error updating transportation:", error);
+        });
+    } catch (validationErrors) {
+      validationErrors.inner.forEach((error) => {
+        toast.error(error.message);
+      });
+    }
   };
 
   return (

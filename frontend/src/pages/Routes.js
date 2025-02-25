@@ -3,22 +3,22 @@ import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import Drawer from "react-modern-drawer";
 import "react-modern-drawer/dist/index.css";
+import { Formik, Form, Field, ErrorMessage } from "formik";
+import * as yup from "yup";
 import circleIcon from "../icons/circle.svg";
 import ellipsisIcon from "../icons/ellipsis-v.svg";
 
 const Routes = () => {
-  const [origin, setOrigin] = useState("");
-  const [destination, setDestination] = useState("");
   const [routes, setRoutes] = useState([]);
   const [locations, setLocations] = useState([]);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedRoute, setSelectedRoute] = useState(null);
 
-  const fetchRoutes = () => {
+  const fetchRoutes = (values) => {
     window.axios
       .post(`http://localhost:8080/path/find`, {
-        fromLocation: origin,
-        toLocation: destination,
+        fromLocation: values.origin,
+        toLocation: values.destination,
       })
       .then((response) => {
         setRoutes(response.data.transportationList);
@@ -27,7 +27,12 @@ const Routes = () => {
       .catch((error) => {
         console.error("Error fetching routes:", error);
       });
-    console.log("Fetching routes from", origin, "to", destination);
+    console.log(
+      "Fetching routes from",
+      values.origin,
+      "to",
+      values.destination
+    );
   };
 
   const fetchLocations = async () => {
@@ -42,17 +47,6 @@ const Routes = () => {
     }
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    if (name === "origin") {
-      setOrigin(value);
-      console.log({ [name]: value });
-    } else if (name === "destination") {
-      setDestination(value);
-      console.log({ [name]: value });
-    }
-  };
-
   const handleRouteClick = (route) => {
     setSelectedRoute(route);
     setIsDrawerOpen(true);
@@ -62,45 +56,80 @@ const Routes = () => {
     fetchLocations();
   }, []);
 
+  const validationSchema = yup.object().shape({
+    origin: yup.string().required("Origin is required"),
+    destination: yup.string().required("Destination is required"),
+  });
+
   return (
     <>
       <div>
         <h2>Find Routes</h2>
-        <div className="mb-3">
-          <label>Origin</label>
-          <select
-            className="form-select"
-            name="origin"
-            onChange={handleInputChange}
-          >
-            <option value="">Origin</option>
-            {locations.map((location) => (
-              <option key={location.locationCode} value={location.locationCode}>
-                {`${location.locationCode} - ${location.name}, ${location.city}, ${location.country}`}
-              </option>
-            ))}
-          </select>
-        </div>
+        <Formik
+          initialValues={{ origin: "", destination: "" }}
+          validationSchema={validationSchema}
+          onSubmit={(values) => {
+            fetchRoutes(values);
+          }}
+        >
+          {({ handleChange }) => (
+            <Form>
+              <div className="mb-3">
+                <label>Origin</label>
+                <Field
+                  as="select"
+                  className="form-select"
+                  name="origin"
+                  onChange={handleChange}
+                >
+                  <option value="">Origin</option>
+                  {locations.map((location) => (
+                    <option
+                      key={location.locationCode}
+                      value={location.locationCode}
+                    >
+                      {`${location.locationCode} - ${location.name}, ${location.city}, ${location.country}`}
+                    </option>
+                  ))}
+                </Field>
+                <ErrorMessage
+                  name="origin"
+                  component="div"
+                  className="text-danger"
+                />
+              </div>
 
-        <div className="mb-3">
-          <label>Destination</label>
-          <select
-            className="form-select"
-            name="destination"
-            onChange={handleInputChange}
-          >
-            <option value="">Destination</option>
-            {locations.map((location) => (
-              <option key={location.locationCode} value={location.locationCode}>
-                {`${location.locationCode} - ${location.name}, ${location.city}, ${location.country}`}
-              </option>
-            ))}
-          </select>
-        </div>
+              <div className="mb-3">
+                <label>Destination</label>
+                <Field
+                  as="select"
+                  className="form-select"
+                  name="destination"
+                  onChange={handleChange}
+                >
+                  <option value="">Destination</option>
+                  {locations.map((location) => (
+                    <option
+                      key={location.locationCode}
+                      value={location.locationCode}
+                    >
+                      {`${location.locationCode} - ${location.name}, ${location.city}, ${location.country}`}
+                    </option>
+                  ))}
+                </Field>
+                <ErrorMessage
+                  name="destination"
+                  component="div"
+                  className="text-danger"
+                />
+              </div>
 
-        <button className="btn btn-primary" onClick={fetchRoutes}>
-          Find Routes
-        </button>
+              <button type="submit" className="btn btn-primary">
+                Find Routes
+              </button>
+            </Form>
+          )}
+        </Formik>
 
         {routes.length > 0 && <h3 className="mt-3">Available Routes</h3>}
         <ul className="mt-3 p-0">
@@ -120,12 +149,12 @@ const Routes = () => {
                   border: "1px solid #ccc",
                   padding: "10px",
                   borderRadius: "5px",
-                  width: "650px",
+                  width: "75%",
                 }}
               >
                 {routeOption.map((route, subIndex) => (
                   <li key={subIndex}>
-                    {`From: ${route.fromLocation} ----> To: ${route.toLocation}, ----> Vehicle: ${route.transportationType}`}
+                    {`${route.fromLocation} -- ${route.transportationType} --> ${route.toLocation},`}
                   </li>
                 ))}
               </ul>
@@ -136,7 +165,7 @@ const Routes = () => {
           open={isDrawerOpen}
           onClose={() => setIsDrawerOpen(false)}
           direction="right"
-          style={{ width: "20%" }}
+          style={{ width: "30%" }}
         >
           <div style={{ padding: "20px" }}>
             <h3 style={{ margin: "0 0 20px 0" }}>Route Details</h3>
