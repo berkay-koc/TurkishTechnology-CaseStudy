@@ -1,0 +1,24 @@
+.routes-container {
+  list-style-type: none;
+  border: 1px solid #ccc;
+  padding: 10px;
+  border-radius: 5px;
+  width: 75%;
+}
+
+.routes-list-item {
+  list-style-type: none;
+  cursor: pointer;
+}
+
+.drawer-item {
+  width: 20% !important;
+}
+
+.drawer-item div:first-of-type {
+  padding: 20px;
+}
+
+.drawer-item div h3 {
+  margin: 0 0 20px 0;
+}

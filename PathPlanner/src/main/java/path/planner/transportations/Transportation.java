@@ -2,6 +2,7 @@ package path.planner.transportations;
 
 import java.io.Serializable;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -34,15 +35,18 @@ public class Transportation implements Serializable {
 	@Size(min = 1, max = 255, message = "From location must be between 1 and 255 characters.")
 	@Column(name = "from_location", nullable = false)
 	@NotNull(message = "From location cannot be empty.")
+	@Schema(name = "From Location", example = "SAW")
 	private String fromLocation;
 
 	@Size(min = 1, max = 255, message = "To location must be between 1 and 255 characters.")
 	@Column(name = "to_location", nullable = false)
 	@NotNull(message = "To location cannot be empty.")
+	@Schema(name = "To Location", example = "ADB")
 	private String toLocation;
 
 	@Column(name = "transportation_type", nullable = false)
 	@NotNull(message = "Transportation type cannot be empty.")
+	@Schema(name = "Transportation Type", example = "SUBWAY")
 	private TransportationEnum transportationType;
 
 	@Override

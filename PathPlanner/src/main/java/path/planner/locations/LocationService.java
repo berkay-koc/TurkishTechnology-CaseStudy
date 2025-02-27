@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import path.planner.error.AlreadyExistsException;
 import path.planner.error.NotFoundException;
 import path.planner.shared.GenericResponse;
 
@@ -28,6 +29,9 @@ public class LocationService {
 
 	public GenericResponse save(String locationId, Location location) {
 		Location controlLocation = getLocationById(locationId);
+		if(!controlLocation.getLocationCode().equals(location.getLocationCode())) {
+			throw new AlreadyExistsException("Location code cannot be different.");
+		}
 		if (controlLocation == null) {
 			return new GenericResponse("Location could not be updated.");
 		} else {

@@ -17,7 +17,7 @@ const LocationSchema = yup.object().shape({
 
 const Locations = () => {
   const [locations, setLocations] = useState([]);
-  const [selectedLocation, setSelectedLocation] = useState(null); // Seçilen lokasyonu tutan state
+  const [selectedLocation, setSelectedLocation] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [updateMode, setUpdateMode] = useState(false);
@@ -34,21 +34,16 @@ const Locations = () => {
 
   const fetchLocations = async () => {
     try {
-      const response = await window.axios
-        .get("http://localhost:8080/location/get", {
-          validateStatus: function (status) {
-            return status === 200;
-          },
-        })
+      await window.axios
+        .get("http://localhost:8080/location/get")
         .then((response) => {
           setLocations(response.data);
-          console.log(response.data);
         })
         .catch((error) => {
-          console.error("Error fetching locations:", error);
+          toast.error("Error fetching locations:", error);
         });
     } catch (error) {
-      console.error("Error fetching locations:", error);
+      toast.error("Error fetching locations:", error);
     }
   };
 
@@ -58,7 +53,6 @@ const Locations = () => {
 
   const handleRowClick = (location) => {
     setSelectedLocation(location);
-    console.log(location);
   };
 
   const openModal = () => {
@@ -96,16 +90,17 @@ const Locations = () => {
   const handleDeleteLocation = async () => {
     const { locationCode } = selectedLocation;
     const url = `http://localhost:8080/location/delete/${locationCode}`;
-    try {
-      await window.axios.delete(url);
-      toast.success("Location deleted successfully.");
-      fetchLocations();
-      closeDeleteModal();
-    } catch (error) {
-      toast.error("Failed to delete location.");
-      console.error("Error deleting location:", error);
-      closeDeleteModal();
-    }
+    await window.axios
+      .delete(url)
+      .then(() => {
+        toast.success("Location deleted successfully.");
+        fetchLocations();
+        closeDeleteModal();
+      })
+      .catch(() => {
+        toast.error("Failed to delete location.");
+        closeDeleteModal();
+      });
   };
 
   const handleInputChange = async (e) => {
@@ -114,7 +109,6 @@ const Locations = () => {
       ...locationData,
       [name]: value,
     });
-    console.log(locationData);
   };
 
   const handleSave = async () => {
@@ -124,14 +118,12 @@ const Locations = () => {
       });
       window.axios
         .post("http://localhost:8080/location/create", locationData)
-        .then((response) => {
-          console.log("Location created successfully:", response.data);
+        .then(() => {
           toast.success("Location added succesfully.");
           fetchLocations();
         })
-        .catch((error) => {
+        .catch(() => {
           toast.error("Failed to add location.");
-          console.error("Error creating location:", error);
         });
       closeModal();
     } catch (validationErrors) {
@@ -148,21 +140,19 @@ const Locations = () => {
       });
       const { locationCode, name, city, country } = locationData;
       const url = `http://localhost:8080/location/update/${locationCode}`;
-      const response = await window.axios
+      await window.axios
         .post(url, {
           name,
           city,
           country,
           locationCode,
         })
-        .then((response) => {
-          console.log("Location updated successfully:", response.data);
+        .then(() => {
           toast.success("Location updated successfully.");
           fetchLocations();
         })
-        .catch((error) => {
+        .catch(() => {
           toast.error("Failed to update location.");
-          console.error("Error updating location:", error);
         });
       fetchLocations();
       closeModal();

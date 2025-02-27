@@ -17,10 +17,4 @@ public class GlobalExceptionHandler {
 	    return new GenericResponse("An unexpected error occurred.");
 	}
 
-	@ExceptionHandler(Exception.class)
-	@ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-	public GenericResponse handleOtherExceptions(Exception e) {
-	    return new GenericResponse("An unexpected error occurred: " + e.getMessage());
-	}
-
 }

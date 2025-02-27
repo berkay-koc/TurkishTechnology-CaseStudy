@@ -21,7 +21,7 @@ const AddTransportationModal = ({
       );
       setLocations(response.data);
     } catch (error) {
-      console.error("Error fetching locations:", error);
+      toast.error("Error fetching locations:");
     }
   };
 

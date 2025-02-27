@@ -29,7 +29,7 @@ const Transportations = () => {
 
   const fetchTransportations = async () => {
     try {
-      const response = await window.axios
+      await window.axios
         .get("http://localhost:8080/transportation/fetch", {
           validateStatus: function (status) {
             return status === 200;
@@ -39,10 +39,10 @@ const Transportations = () => {
           setTransportations(response.data);
         })
         .catch((error) => {
-          console.error("Error fetching transportations:", error);
+          toast.error("Error fetching transportations:", error);
         });
     } catch (error) {
-      console.error("Error fetching transportations:", error);
+      toast.error("Error fetching transportations:", error);
     }
   };
 
@@ -77,7 +77,6 @@ const Transportations = () => {
       closeDeleteModal();
     } catch (error) {
       toast.error("Failed to delete transportation.");
-      console.error("Error deleting transportation:", error);
       closeDeleteModal();
     }
   };
@@ -86,13 +85,10 @@ const Transportations = () => {
     fetchTransportations();
   }, []);
 
-  useEffect(() => {
-    console.log("Transportation data changed:", transportationData);
-  }, [transportationData]);
+  useEffect(() => {}, [transportationData]);
 
   const handleRowClick = (transportation) => {
     setSelectedTransportation(transportation);
-    console.log(transportation);
   };
 
   const openModal = () => {
@@ -117,7 +113,6 @@ const Transportations = () => {
       ...prevData,
       [name]: value,
     }));
-    console.log({ [name]: value });
   };
 
   const handleSave = async (values) => {
@@ -125,21 +120,15 @@ const Transportations = () => {
       await transportationSchema.validate(values, {
         abortEarly: false,
       });
-      console.log(values);
       window.axios
         .post("http://localhost:8080/transportation/create", values)
-        .then((response) => {
-          console.log("Transportation created succesfully:", response.data);
+        .then(() => {
           toast.success("Transportation created succesfully.");
           fetchTransportations();
           closeModal();
         })
         .catch((error) => {
           toast.error(error.response.data.message);
-          console.error(
-            "Error creating location:",
-            error.response.data.message
-          );
           closeModal();
         });
     } catch (validationErrors) {
@@ -157,21 +146,19 @@ const Transportations = () => {
       const { fromLocation, toLocation, transportationType, transportationId } =
         values;
       const url = `http://localhost:8080/transportation/update/${transportationId}`;
-      const response = await window.axios
+      await window.axios
         .post(url, {
           fromLocation,
           toLocation,
           transportationType,
         })
-        .then((response) => {
-          console.log("Transportation updated successfully:", response.data);
+        .then(() => {
           toast.success("Transportation updated successfully.");
           fetchTransportations();
           closeModal();
         })
         .catch((error) => {
           toast.error("Failed to update transportation.", error.data.message);
-          console.error("Error updating transportation:", error);
         });
     } catch (validationErrors) {
       validationErrors.inner.forEach((error) => {
@@ -183,13 +170,7 @@ const Transportations = () => {
   return (
     <>
       <div className="container mt-4">
-        <div
-          style={{
-            display: "flex",
-            flexDirection: "row",
-            justifyContent: "space-between",
-          }}
-        >
+        <div className="transportations-container">
           <h2>Transportations</h2>
           <button className="btn" onClick={openModal}>
             <img src={addIcon} alt="Edit" style={{ marginRight: "5px" }} />
